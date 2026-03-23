@@ -10,21 +10,19 @@ import pages.BasePage;
 
 public class Hooks {
 
-    // 🔹 Se ejecuta antes de cada escenario
     @Before
-    public void setup() {
+    public void setUp() {
         BasePage.initializeDriver(); // Inicializa ChromeDriver + WebDriverWait
     }
 
-    // 🔹 Se ejecuta después de cada escenario
     @After
     public void tearDown(Scenario scenario) {
         if (scenario.isFailed()) {
-            scenario.log("Scenario failing, please refer to the image attached to this report");
+            scenario.log("Scenario failing, please refer to the attached screenshot");
             final byte[] screenshot = ((TakesScreenshot) BasePage.getDriver())
                     .getScreenshotAs(OutputType.BYTES);
-            scenario.attach(screenshot, "image/png", scenario.getName());
+            scenario.attach(screenshot, "image/png", "Screenshot of the error");
         }
-        BasePage.closeBrowser(); // Cierra el navegador al final
+        BasePage.closeBrowser();
     }
 }
