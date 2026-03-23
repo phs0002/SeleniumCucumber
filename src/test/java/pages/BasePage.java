@@ -16,52 +16,44 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class BasePage {
-    /*
-     * Declaración de una variable estática 'driver' de tipo WebDriver
-     * Esta variable va a ser compartida por todas las instancias de BasePage y sus
-     * subclases
-     */
-    protected static WebDriver driver;
-    /*
-     * Declaración de una variable de instancia 'wait' de tipo WebDriverWait.
-     * Se inicializa inmediatamente con una instancia dew WebDriverWait utilizando
-     * el 'driver' estático
-     * WebDriverWait se usa para poner esperas explícitas en los elementos web
-     */
-    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 
-    /*
-     * Configura el WebDriver para Chrome usando WebDriverManager.
-     * WebDriverManager va a estar descargando y configurando automáticamente el
-     * driver del navegador
-     */
+    protected static WebDriver driver;
+    protected static WebDriverWait wait;
+
+    // Inicialización estática del driver y WebDriverWait
     static {
         WebDriverManager.chromedriver().setup();
 
-        // Inicializa la variable estática 'driver' con una instancia de ChromeDriver
-        driver = new ChromeDriver();
+        ChromeDriver chromeDriver = new ChromeDriver();  // Puedes agregar opciones headless aquí si quieres
+        driver = chromeDriver;
+
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }
 
-    /*
-     * Este es el constructor de BasePage que acepta un objeto WebDriver como
-     * argumento.
-     */
+    // Constructor (puedes dejarlo si lo necesitas)
     public BasePage(WebDriver driver) {
         BasePage.driver = driver;
     }
 
-    // Método estático para navegar a una URL.
+    // 🔹 Nuevo método: permite acceder al driver desde TestRunner o Hooks
+    public static WebDriver getDriver() {
+        return driver;
+    }
+
+    // Navegar a una URL
     public static void navigateTo(String url) {
         driver.get(url);
     }
 
-    // Método estático para cerrar la instancia del driver.
+    // Cerrar navegador
     public static void closeBrowser() {
-        driver.quit();
+        if (driver != null) {
+            driver.quit();
+            driver = null;
+        }
     }
 
-    // Encuentra y devuelve un WebElement en la página utilizando un locator XPath,
-    // esperando a que esté presentente en el DOM
+    // Buscar elemento con espera explícita
     private WebElement Find(String locator) {
         return wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(locator)));
     }
@@ -77,35 +69,25 @@ public class BasePage {
 
     public void selectFromDropdownByValue(String locator, String value) {
         Select dropdown = new Select(Find(locator));
-
         dropdown.selectByValue(value);
     }
 
     public void selectFromDropdownByIndex(String locator, Integer index) {
         Select dropdown = new Select(Find(locator));
-
         dropdown.selectByIndex(index);
     }
 
     public int dropdownSize(String locator) {
         Select dropdown = new Select(Find(locator));
-
-        List<WebElement> dropdownOptions = dropdown.getOptions();
-
-        return dropdownOptions.size();
+        return dropdown.getOptions().size();
     }
 
     public List<String> getDropdownValues(String locator) {
         Select dropdown = new Select(Find(locator));
-
-        List<WebElement> dropdownOptions = dropdown.getOptions();
         List<String> values = new ArrayList<>();
-        for (WebElement option : dropdownOptions) {
+        for (WebElement option : dropdown.getOptions()) {
             values.add(option.getText());
         }
-
         return values;
-
     }
-
 }
